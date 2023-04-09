@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         trueButton.setOnClickListener {
             checkAnswer(true)
         }
+
         falseButton.setOnClickListener {
             checkAnswer(false)
         }
@@ -66,13 +67,19 @@ class MainActivity : AppCompatActivity() {
     private fun checkAnswer(userAnswer: Boolean) {
         val correctAnswer = questionBank[currentIndex].answer
 
-        val messageResId = if (userAnswer == correctAnswer) {
-            R.string.correct_toast
-        } else {
-            R.string.incorrect_toast
-        }
+        if (questionBank[currentIndex].userAnswer == null) {
+            questionBank[currentIndex].userAnswer = userAnswer
 
-        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
-            .show()
+            val messageResId = if (userAnswer == correctAnswer) {
+                R.string.correct_toast
+            } else {
+                R.string.incorrect_toast
+            }
+
+            Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
+                .show()
+        }
     }
+
+
 }
