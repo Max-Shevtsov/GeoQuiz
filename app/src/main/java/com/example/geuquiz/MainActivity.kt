@@ -14,6 +14,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nextButton: ImageButton
     private lateinit var prevButton: ImageButton
     private lateinit var questionTextView: TextView
+    private var correctAnswerCounter = 0.0
 
     private val questionBank = listOf(
         Question(R.string.question_australia, true),
@@ -70,6 +71,9 @@ class MainActivity : AppCompatActivity() {
         if (questionBank[currentIndex].userAnswer == null) {
             questionBank[currentIndex].userAnswer = userAnswer
 
+
+            if (userAnswer == correctAnswer) correctAnswerCounter++
+
             val messageResId = if (userAnswer == correctAnswer) {
                 R.string.correct_toast
             } else {
@@ -78,8 +82,19 @@ class MainActivity : AppCompatActivity() {
 
             Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
                 .show()
+
+            getResult()
         }
     }
 
+    private fun getResult() {
+        if (questionBank.none { it.userAnswer == null }) {
+            correctAnswerCounter /= questionBank.size
+
+            val correctAnswerPercent = "%.2f".format(correctAnswerCounter * 100) + "%"
+            Toast.makeText(this, correctAnswerPercent, Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
 
 }
