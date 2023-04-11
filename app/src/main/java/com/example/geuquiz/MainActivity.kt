@@ -1,11 +1,15 @@
 package com.example.geuquiz
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+
+private const val TAG = "MainActivity"
 
 class MainActivity : AppCompatActivity() {
 
@@ -14,22 +18,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nextButton: ImageButton
     private lateinit var prevButton: ImageButton
     private lateinit var questionTextView: TextView
+
     private var correctAnswerCounter = 0.0
 
-    private val questionBank = listOf(
-        Question(R.string.question_australia, true),
-        Question(R.string.question_ocean, true),
-        Question(R.string.question_mideast, false),
-        Question(R.string.question_africa, false),
-        Question(R.string.question_americas, true),
-        Question(R.string.question_asia, true)
-    )
+    private val quizViewModel: QuizViewModel by viewModels()
 
-    private var currentIndex = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG,"onCreate(Bundle?) called")
         setContentView(R.layout.activity_main)
+
+        
 
         trueButton = findViewById(R.id.true_button)
         falseButton = findViewById(R.id.false_button)
@@ -46,34 +46,41 @@ class MainActivity : AppCompatActivity() {
         }
 
         nextButton.setOnClickListener {
-            currentIndex = (currentIndex + 1) % questionBank.size
+            quizViewModel.moveToNext()
             updateQuestion()
         }
 
         prevButton.setOnClickListener {
-            if (currentIndex > 0) {
-                currentIndex = (currentIndex - 1) % questionBank.size
-            }
+           quizViewModel.moveToPrev()
             updateQuestion()
         }
 
         updateQuestion()
     }
 
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart() called")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop() called")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy() called")
+    }
+
     private fun updateQuestion() {
-        val questionTextResId = questionBank[currentIndex].textResId
+        val questionTextResId = quizViewModel.currentQuestionText
         questionTextView.setText(questionTextResId)
     }
 
     private fun checkAnswer(userAnswer: Boolean) {
-        val correctAnswer = questionBank[currentIndex].answer
-
-        if (questionBank[currentIndex].userAnswer == null) {
-            questionBank[currentIndex].userAnswer = userAnswer
-
-
-            if (userAnswer == correctAnswer) correctAnswerCounter++
-
+        val correctAnswer = quizViewModel.currentQuestionAnswer
+        
             val messageResId = if (userAnswer == correctAnswer) {
                 R.string.correct_toast
             } else {
@@ -82,19 +89,8 @@ class MainActivity : AppCompatActivity() {
 
             Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
                 .show()
-
-            getResult()
-        }
-    }
-
-    private fun getResult() {
-        if (questionBank.none { it.userAnswer == null }) {
-            correctAnswerCounter /= questionBank.size
-
-            val correctAnswerPercent = "%.2f".format(correctAnswerCounter * 100) + "%"
-            Toast.makeText(this, correctAnswerPercent, Toast.LENGTH_SHORT)
-                .show()
-        }
+        
+        
     }
 
 }
